@@ -1,6 +1,7 @@
 package com.vonhof.jcanonical;
 
 import com.vonhof.jcanonical.Accessor;
+import com.vonhof.jcanonical.ExampleCanonical;
 import com.vonhof.jcanonical.ExampleCanonicalAccessor;
 import com.vonhof.jcanonical.FieldAccessor;
 import com.vonhof.jcanonical.targets.NestedExample;
@@ -20,17 +21,32 @@ public class ExampleCanonicalAccessor extends Accessor<NestedExample> {
 
     public ExampleCanonicalAccessor(NestedExample delegate) {
         super(delegate);
-        this.id = new FieldAccessor<com.vonhof.jcanonical.targets.NestedExample,java.lang.String>(delegate,"Some/Deeply/Nested/ID/value");
+        this.id = new FieldAccessor<com.vonhof.jcanonical.targets.NestedExample,java.lang.String>(delegate,"Some/Deeply/Nested/Id/value");
         this.amount = new FieldAccessor<com.vonhof.jcanonical.targets.NestedExample,java.math.BigDecimal>(delegate,"Some/Deeply/Nested/Amount/value");
         this.examples = new FieldAccessor<com.vonhof.jcanonical.targets.NestedExample,java.util.List<com.vonhof.jcanonical.targets.NestedExample>>(delegate,"Some/Deeply/Nested/Examples");
 
     }
 
-    public String getID() {
+    public ExampleCanonical toCanonical() {
+        ExampleCanonical canonical = new ExampleCanonical();
+        canonical.setId(getId());
+        canonical.setAmount(getAmount());
+        canonical.setExamples(getExamples());
+        return canonical;
+    }
+
+    public ExampleCanonicalAccessor fromCanonical(ExampleCanonical canonical) {
+        this.setId(canonical.getId());
+        this.setAmount(canonical.getAmount());
+        this.setExamples(canonical.getExamples());
+        return this;
+    }
+
+    public String getId() {
         return this.id.get();
     }
 
-    public ExampleCanonicalAccessor setID(String value) {
+    public ExampleCanonicalAccessor setId(String value) {
         this.id.set(value);
         return this;
     }

@@ -47,7 +47,7 @@ public class CanonicalProcessor implements CodeProcessor<JavaClass> {
         }
 
 
-        final String className = original.getName().appendPart("Accessor").getCapitalized();
+        final String className = original.copy().getName().appendPart("Accessor").getCapitalized();
 
         final JavaType superType = New.type("com.vonhof.jcanonical.Accessor<%s>", targetClass.getCanonicalName());
 
@@ -62,12 +62,19 @@ public class CanonicalProcessor implements CodeProcessor<JavaClass> {
 
 
         final JavaConstructor constructor = New.constructor(Constructors.PUBLIC, New.parameter(targetClass,"delegate"));
-
         accessorClass.getConstructors().add(constructor);
-
         StringBuilder constructorBody = new StringBuilder();
-
         constructorBody.append("super(delegate);\n");
+
+        final JavaMethod toCanonicalMethod = New.method(Methods.PUBLIC, original.getType(), "toCanonical");
+        accessorClass.getMethods().add(toCanonicalMethod);
+        StringBuilder toCanonicalBody = new StringBuilder();
+        toCanonicalBody.append(String.format("%1$s canonical = new %1$s();\n",original.getName().getCapitalized()));
+
+        final JavaMethod fromCanonicalMethod = New.method(Methods.PUBLIC, accessorType, "fromCanonical",New.parameter(original.getType(),"canonical"));
+        accessorClass.getMethods().add(fromCanonicalMethod);
+        StringBuilder fromCanonicalBody = new StringBuilder();
+
 
         for(JavaField field : original.getFields()) {
 
@@ -83,9 +90,18 @@ public class CanonicalProcessor implements CodeProcessor<JavaClass> {
 
             constructorBody.append(makeConstructorInit(field, targetClass, canonicalPath)).append("\n");
 
+            toCanonicalBody.append(String.format("canonical.set%1$s(get%1$s());\n",field.getName().getCapitalized()));
+            fromCanonicalBody.append(String.format("this.set%1$s(canonical.get%1$s());\n",field.getName().getCapitalized()));
         }
 
+
         constructor.getBody().setHardcoded(constructorBody.toString());
+
+        toCanonicalBody.append("return canonical;");
+        toCanonicalMethod.getBody().setHardcoded(toCanonicalBody.toString());
+
+        fromCanonicalBody.append("return this;");
+        fromCanonicalMethod.getBody().setHardcoded(fromCanonicalBody.toString());
 
         return accessorClass;
     }
