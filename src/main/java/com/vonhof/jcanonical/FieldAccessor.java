@@ -40,7 +40,7 @@ public class FieldAccessor<T,U> {
         return null;
     }
 
-    protected U getValue() throws NoSuchFieldException, IllegalAccessException {
+    protected U getValue() throws NoSuchFieldException, IllegalAccessException, InstantiationException {
         String[] parts = path.split("/");
 
         Object pointer = target;
@@ -50,13 +50,19 @@ public class FieldAccessor<T,U> {
             Field field = pointer.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
 
-            pointer = field.get(pointer);
+            Object value = field.get(pointer);
+
+            if (value == null) {
+                return null;
+            }
+
+            pointer = value;
         }
 
         return (U) pointer;
     }
 
-    protected T setValue(U value) throws NoSuchFieldException, IllegalAccessException {
+    protected T setValue(U value) throws NoSuchFieldException, IllegalAccessException, InstantiationException {
         String[] parts = path.split("/");
 
         Object pointer = target;
@@ -70,7 +76,15 @@ public class FieldAccessor<T,U> {
             if (i == (parts.length-1)) {
                 field.set(pointer, value);
             } else {
-                pointer = field.get(pointer);
+                Object fieldVal = field.get(pointer);
+
+                if (fieldVal == null) {
+                    //Init on-demand
+                    fieldVal = field.getType().newInstance();
+                    field.set(pointer,fieldVal);
+                }
+
+                pointer = fieldVal;
             }
         }
 

@@ -5,5 +5,13 @@ import java.math.BigDecimal;
 
 public class AmountType {
 
-    private BigDecimal value = new BigDecimal("1234");
+    private BigDecimal value;
+
+    public BigDecimal getValue() {
+        return value;
+    }
+
+    public void setValue(BigDecimal value) {
+        this.value = value;
+    }
 }

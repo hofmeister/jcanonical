@@ -6,9 +6,6 @@ import com.vonhof.jcanonical.targets.NestedExample;
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * Used as a definition file only
- */
 @Canonical(NestedExample.class)
 public class ExampleCanonical {
     @CanonicalField("Some/Deeply/Nested/ID/value")
